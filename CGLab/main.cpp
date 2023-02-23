@@ -16,6 +16,10 @@ bool pendulum_dir=1, pendulumRotation=0;
 int hours=1, minutes=30, seconds=10;
 bool operationApplied=0;
 bool ct=0,cr=0,cs=0;
+float rc=0, tc=0, sc=1, scalingSpeed=0.001;
+float rotationAngle=0;
+float translationMagnitude=0;
+float scalingMagnitude=1;
 
 GLfloat V[8][3]={
     {-0.5,0.8,0.2},
@@ -197,6 +201,44 @@ void drawClock(){
 }
 
 void rotateClock(){
+    glPushMatrix();
+    glTranslatef(0, 0.15, 0);
+    glRotatef(rc, 0, 0, 1);
+    glTranslatef(0, -0.15, 0);
+    drawClock();
+    glPopMatrix();
+    
+    if(rc<=rotationAngle)
+        rc+=0.08;
+    
+    if(rc>rotationAngle)
+        return;
+    glutPostRedisplay();
+    
+}
+
+void translateClock(){
+    glPushMatrix();
+    glTranslatef(tc, 0, 0);
+    drawClock();
+    glPopMatrix();
+    
+    if(tc>=translationMagnitude)
+        tc-=0.01;
+    
+    glutPostRedisplay();
+}
+
+void scaleClock(){
+    glPushMatrix();
+    glScalef(sc, sc, sc);
+    drawClock();
+    glPopMatrix();
+    
+    if(sc<=scalingMagnitude)
+        sc+=scalingSpeed;
+    
+    glutPostRedisplay();
     
 }
 
@@ -213,10 +255,12 @@ void display(){
     if(!operationApplied)
         drawClock();
     
-    if(cr){
-        
-    }
-    
+    if(cr)
+        rotateClock();
+    if(ct)
+        translateClock();
+    if(cs)
+        scaleClock();
     
     glutSwapBuffers();
 }
@@ -259,16 +303,33 @@ void mouse(int button, int state, int x, int y){
 
 void operations(int id){
     switch(id){
+        case 3:
+            operationApplied=0;
+            cr=ct=cs=0;
+            glutPostRedisplay();
+            break;
     }
 }
 
 void translation(int id){
     switch(id){
         case 1:
-            
+            operationApplied=1;
+            cs=0;
+            cr=0;
+            ct=1;
+            translateClock();
+            translationMagnitude=-0.2;
+            glutPostRedisplay();
             break;
         case 2:
-            
+            operationApplied=1;
+            cs=0;
+            cr=0;
+            ct=1;
+            translateClock();
+            translationMagnitude=-0.4;
+            glutPostRedisplay();
             break;
     }
 }
@@ -276,10 +337,22 @@ void translation(int id){
 void rotation(int id){
     switch(id){
         case 1:
-            
+            operationApplied=1;
+            cs=0;
+            cr=1;
+            ct=0;
+            rotateClock();
+            rotationAngle=15;
+            glutPostRedisplay();
             break;
         case 2:
-            
+            operationApplied=1;
+            cs=0;
+            cr=1;
+            ct=0;
+            rotateClock();
+            rotationAngle=30;
+            glutPostRedisplay();
             break;
     }
 }
@@ -287,10 +360,21 @@ void rotation(int id){
 void scaling(int id){
     switch(id){
         case 1:
-            
+            operationApplied=1;
+            cs=1;
+            ct=0;
+            cr=0;
+            scaleClock();
+            scalingMagnitude=1.5;
+            glutPostRedisplay();
             break;
         case 2:
-            
+            operationApplied=1;
+            cs=1;
+            ct=0;
+            cr=0;
+            scalingMagnitude=3;
+            glutPostRedisplay();
             break;
     }
 }
@@ -323,6 +407,7 @@ int main(int argc,char* argv[]){
     glutAddSubMenu("Transalation", sub_menu1);
     glutAddSubMenu("Rotation", sub_menu2);
     glutAddSubMenu("Scaling", sub_menu3);
+    glutAddMenuEntry("Original", 3);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
     
     
